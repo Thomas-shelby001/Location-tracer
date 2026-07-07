@@ -45,15 +45,14 @@ from opencage.geocoder import OpenCageGeocode
 from datetime import datetime
 from pathlib import Path
 
-# ===== CONFIGURATION =====
-# 🔑 Using Mr Lee's API Key - Free to use!
+
 API_KEY = "8ee962a0b6af4c848bf4b0bf3669ea8c"
 
-VERSION = "2.0.0"
+VERSION = "1.0.0"
 AUTHOR = "Mr Lee"
 GITHUB = "https://github.com/Thomas-shelby001/Location-tracer"
 
-# ===== COLOR CODES =====
+
 class Colors:
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
