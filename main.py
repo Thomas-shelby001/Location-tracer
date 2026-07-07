@@ -49,7 +49,7 @@ from pathlib import Path
 # 🔑 Using Mr Lee's API Key - Free to use!
 API_KEY = "8ee962a0b6af4c848bf4b0bf3669ea8c"
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 AUTHOR = "Mr Lee"
 GITHUB = "https://github.com/Thomas-shelby001/Location-tracer"
 
@@ -125,6 +125,7 @@ def loading_animation(message="Processing", duration=1):
     print('\r' + ' ' * 50 + '\r', end='')
 
 def select_save_location():
+    """Let user select where to save the map file"""
     print(f"\n{Colors.YELLOW}📁 SELECT SAVE LOCATION:{Colors.RESET}")
     print(f"{Colors.CYAN}1.{Colors.RESET} Current directory (./)")
     print(f"{Colors.CYAN}2.{Colors.RESET} Documents folder")
@@ -341,14 +342,17 @@ def main():
     print("   • Type 'q' or 'quit' to exit")
     print(f"{Colors.YELLOW}{'-'*50}{Colors.RESET}")
     
+    # Select save location once at start
     save_path = select_save_location()
     print(f"{Colors.GREEN}✅ Files will be saved to: {save_path}{Colors.RESET}")
     
     while True:
         try:
+            # Get phone number from user
             print(f"\n{Colors.CYAN}📱 Enter phone number:{Colors.RESET} ", end='')
             phone_number = input().strip()
             
+            # Check for special commands
             if phone_number.lower() in ['q', 'quit', 'exit']:
                 print(f"\n{Colors.GREEN}👋 Goodbye! Thanks for using!{Colors.RESET}")
                 print(f"{Colors.PURPLE}Made with ❤️ by {AUTHOR}{Colors.RESET}")
@@ -362,18 +366,22 @@ def main():
                 print(f"{Colors.RED}❌ Please enter a phone number!{Colors.RESET}")
                 continue
             
+            # Validate number
             parsed_number, error = validate_phone(phone_number)
             if error:
                 print(error)
                 continue
             
+            # Get location info
             info, error = get_location_info(parsed_number)
             if error:
                 print(error)
                 continue
             
+            # Display info
             display_info(info, phone_number)
             
+            # Get coordinates
             lat, lng, error = get_coordinates(info['location'])
             if error:
                 print(error)
@@ -381,6 +389,7 @@ def main():
             
             print(f"{Colors.GREEN}✅ Coordinates found: {Colors.WHITE}{lat:.6f}, {lng:.6f}{Colors.RESET}")
             
+            # Create map
             filepath, error = create_map(lat, lng, info['location'], phone_number, info['carrier'], save_path)
             if error:
                 print(error)
@@ -388,6 +397,7 @@ def main():
             
             print(f"{Colors.GREEN}✅ Map saved: {Colors.WHITE}{filepath}{Colors.RESET}")
             
+            # Save to history
             history_data = {
                 'number': phone_number,
                 'location': info['location'],
@@ -398,6 +408,7 @@ def main():
             }
             save_history(history_data)
             
+            # Ask to open map
             print(f"\n{Colors.CYAN}🌐 Open map in browser? (y/n):{Colors.RESET} ", end='')
             open_now = input().strip().lower()
             if open_now in ['y', 'yes']:
@@ -408,6 +419,7 @@ def main():
                     print(error)
                     print(f"{Colors.YELLOW}📁 Open '{filepath}' manually{Colors.RESET}")
             
+            # Ask to continue or exit
             print(f"\n{Colors.CYAN}🔄 Track another number? (y/n):{Colors.RESET} ", end='')
             again = input().strip().lower()
             if again not in ['y', 'yes']:
