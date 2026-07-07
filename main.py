@@ -46,13 +46,12 @@ from datetime import datetime
 from pathlib import Path
 
 # ===== CONFIGURATION =====
-# ⚠️ IMPORTANT: Replace with YOUR OpenCage API key
-# Get free key from: https://opencagedata.com/
-API_KEY = "YOUR_API_KEY_HERE"  # CHANGE THIS!
+# 🔑 Using Mr Lee's API Key - Free to use!
+API_KEY = "8ee962a0b6af4c848bf4b0bf3669ea8c"
 
-VERSION = "2.0.0"
+VERSION = "1.0.0"
 AUTHOR = "Mr Lee"
-GITHUB = "https://github.com/mrlee/phone-tracker"
+GITHUB = "https://github.com/Thomas-shelby001/Location-tracer"
 
 # ===== COLOR CODES =====
 class Colors:
@@ -68,24 +67,20 @@ class Colors:
 
     @staticmethod
     def disable():
-        """Disable colors for Windows compatibility"""
         if platform.system() == "Windows":
             Colors.GREEN = Colors.YELLOW = Colors.RED = Colors.BLUE = ""
             Colors.CYAN = Colors.PURPLE = Colors.BOLD = Colors.RESET = ""
             Colors.WHITE = ""
 
-# Disable colors on Windows
 if platform.system() == "Windows":
     Colors.disable()
 
 # ===== FUNCTIONS =====
 
 def clear_screen():
-    """Clear terminal for all operating systems"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def print_banner():
-    """Display the main banner with Mr Lee"""
     banner = f"""
 {Colors.CYAN}╔══════════════════════════════════════════════════════════════╗
 ║                                                                  ║
@@ -122,7 +117,6 @@ def print_banner():
     print(banner)
 
 def loading_animation(message="Processing", duration=1):
-    """Show loading animation"""
     chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
     for i in range(int(duration * 10)):
         sys.stdout.write(f'\r{Colors.CYAN}{chars[i % len(chars)]} {message}...{Colors.RESET}')
@@ -131,7 +125,6 @@ def loading_animation(message="Processing", duration=1):
     print('\r' + ' ' * 50 + '\r', end='')
 
 def select_save_location():
-    """Let user select where to save the map file"""
     print(f"\n{Colors.YELLOW}📁 SELECT SAVE LOCATION:{Colors.RESET}")
     print(f"{Colors.CYAN}1.{Colors.RESET} Current directory (./)")
     print(f"{Colors.CYAN}2.{Colors.RESET} Documents folder")
@@ -161,7 +154,6 @@ def select_save_location():
         return os.getcwd()
 
 def validate_phone(number):
-    """Validate phone number format"""
     try:
         parsed = phonenumbers.parse(number)
         if not phonenumbers.is_valid_number(parsed):
@@ -173,21 +165,17 @@ def validate_phone(number):
         return None, f"{Colors.RED}❌ Error: {e}{Colors.RESET}"
 
 def get_location_info(parsed_number):
-    """Get location and carrier information"""
     try:
         loading_animation("Getting location info", 1.5)
         
-        # Get location
         location = geocoder.description_for_number(parsed_number, "en")
         if not location:
             location = "Unknown location"
         
-        # Get carrier
         carrier_name = carrier.name_for_number(parsed_number, "en")
         if not carrier_name:
             carrier_name = "Unknown carrier"
         
-        # Get country
         country = geocoder.region_name_for_number(parsed_number, "en")
         if not country:
             country = "Unknown country"
@@ -204,7 +192,6 @@ def get_location_info(parsed_number):
         return None, f"{Colors.RED}❌ Error getting info: {e}{Colors.RESET}"
 
 def get_coordinates(location):
-    """Get latitude and longitude from location name"""
     try:
         loading_animation("Fetching coordinates", 1.5)
         
@@ -222,18 +209,15 @@ def get_coordinates(location):
         return None, None, f"{Colors.RED}❌ Geocoding error: {e}{Colors.RESET}"
 
 def create_map(lat, lng, location, phone_number, carrier_name, save_path):
-    """Create interactive HTML map and save to selected location"""
     try:
         loading_animation("Creating map", 1)
         
-        # Create map with better styling
         my_map = folium.Map(
             location=[lat, lng],
             zoom_start=13,
             tiles='OpenStreetMap'
         )
         
-        # Create popup content
         popup_html = f"""
         <div style="font-family: 'Segoe UI', Arial; padding: 15px; min-width: 250px;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
@@ -251,14 +235,12 @@ def create_map(lat, lng, location, phone_number, carrier_name, save_path):
         </div>
         """
         
-        # Add marker with custom icon
         folium.Marker(
             [lat, lng],
             popup=folium.Popup(popup_html, max_width=350),
             icon=folium.Icon(color='red', icon='phone-alt', prefix='fa')
         ).add_to(my_map)
         
-        # Add circle
         folium.Circle(
             radius=1500,
             location=[lat, lng],
@@ -269,13 +251,9 @@ def create_map(lat, lng, location, phone_number, carrier_name, save_path):
             fill_opacity=0.2
         ).add_to(my_map)
         
-        # Add fullscreen control
         folium.plugins.Fullscreen().add_to(my_map)
-        
-        # Add mouse position
         folium.plugins.MousePosition().add_to(my_map)
         
-        # Save map to selected location
         filename = "location_tracker.html"
         full_path = os.path.join(save_path, filename)
         my_map.save(full_path)
@@ -285,20 +263,16 @@ def create_map(lat, lng, location, phone_number, carrier_name, save_path):
         return None, f"{Colors.RED}❌ Error creating map: {e}{Colors.RESET}"
 
 def open_map(filepath):
-    """Open map in default browser"""
     try:
-        # Different methods for different OS
         if platform.system() == 'Windows':
             os.startfile(filepath)
         else:
             webbrowser.open(f'file://{filepath}')
         return True, None
-        
     except Exception as e:
         return False, f"{Colors.RED}❌ Could not open browser: {e}{Colors.RESET}"
 
 def display_info(info, phone_number):
-    """Display location information with colors"""
     print(f"\n{Colors.YELLOW}{'='*50}{Colors.RESET}")
     print(f"{Colors.GREEN}📍 LOCATION INFORMATION{Colors.RESET}")
     print(f"{Colors.YELLOW}{'='*50}{Colors.RESET}")
@@ -310,7 +284,6 @@ def display_info(info, phone_number):
     print(f"{Colors.YELLOW}{'='*50}{Colors.RESET}")
 
 def save_history(data):
-    """Save tracking history to JSON file"""
     try:
         history_file = "tracking_history.json"
         history = []
@@ -329,7 +302,6 @@ def save_history(data):
         return False
 
 def view_history():
-    """View tracking history"""
     try:
         history_file = "tracking_history.json"
         if not os.path.exists(history_file):
@@ -342,7 +314,7 @@ def view_history():
         print(f"\n{Colors.GREEN}📜 TRACKING HISTORY ({len(history)} records){Colors.RESET}")
         print(f"{Colors.YELLOW}{'='*50}{Colors.RESET}")
         
-        for i, entry in enumerate(history[-10:], 1):  # Show last 10 entries
+        for i, entry in enumerate(history[-10:], 1):
             print(f"{Colors.CYAN}{i}. {entry.get('timestamp', 'Unknown')}{Colors.RESET}")
             print(f"   📱 {entry.get('number', 'Unknown')}")
             print(f"   📍 {entry.get('location', 'Unknown')}")
@@ -357,7 +329,6 @@ def view_history():
 # ===== MAIN PROGRAM =====
 
 def main():
-    """Main program loop"""
     clear_screen()
     print_banner()
     
@@ -370,17 +341,14 @@ def main():
     print("   • Type 'q' or 'quit' to exit")
     print(f"{Colors.YELLOW}{'-'*50}{Colors.RESET}")
     
-    # Select save location once at start
     save_path = select_save_location()
     print(f"{Colors.GREEN}✅ Files will be saved to: {save_path}{Colors.RESET}")
     
     while True:
         try:
-            # Get phone number from user
             print(f"\n{Colors.CYAN}📱 Enter phone number:{Colors.RESET} ", end='')
             phone_number = input().strip()
             
-            # Check for special commands
             if phone_number.lower() in ['q', 'quit', 'exit']:
                 print(f"\n{Colors.GREEN}👋 Goodbye! Thanks for using!{Colors.RESET}")
                 print(f"{Colors.PURPLE}Made with ❤️ by {AUTHOR}{Colors.RESET}")
@@ -394,22 +362,18 @@ def main():
                 print(f"{Colors.RED}❌ Please enter a phone number!{Colors.RESET}")
                 continue
             
-            # Validate number
             parsed_number, error = validate_phone(phone_number)
             if error:
                 print(error)
                 continue
             
-            # Get location info
             info, error = get_location_info(parsed_number)
             if error:
                 print(error)
                 continue
             
-            # Display info
             display_info(info, phone_number)
             
-            # Get coordinates
             lat, lng, error = get_coordinates(info['location'])
             if error:
                 print(error)
@@ -417,7 +381,6 @@ def main():
             
             print(f"{Colors.GREEN}✅ Coordinates found: {Colors.WHITE}{lat:.6f}, {lng:.6f}{Colors.RESET}")
             
-            # Create map
             filepath, error = create_map(lat, lng, info['location'], phone_number, info['carrier'], save_path)
             if error:
                 print(error)
@@ -425,7 +388,6 @@ def main():
             
             print(f"{Colors.GREEN}✅ Map saved: {Colors.WHITE}{filepath}{Colors.RESET}")
             
-            # Save to history
             history_data = {
                 'number': phone_number,
                 'location': info['location'],
@@ -436,7 +398,6 @@ def main():
             }
             save_history(history_data)
             
-            # Ask to open map
             print(f"\n{Colors.CYAN}🌐 Open map in browser? (y/n):{Colors.RESET} ", end='')
             open_now = input().strip().lower()
             if open_now in ['y', 'yes']:
@@ -447,7 +408,6 @@ def main():
                     print(error)
                     print(f"{Colors.YELLOW}📁 Open '{filepath}' manually{Colors.RESET}")
             
-            # Ask to continue or exit
             print(f"\n{Colors.CYAN}🔄 Track another number? (y/n):{Colors.RESET} ", end='')
             again = input().strip().lower()
             if again not in ['y', 'yes']:
@@ -469,7 +429,6 @@ def main():
 # ===== DEPENDENCY CHECK =====
 
 def check_dependencies():
-    """Check if all required packages are installed"""
     missing = []
     packages = ['phonenumbers', 'folium', 'opencage']
     
@@ -490,28 +449,12 @@ def check_dependencies():
     
     return True
 
-def check_api_key():
-    """Check if API key is set"""
-    if API_KEY == "YOUR_API_KEY_HERE":
-        print(f"\n{Colors.RED}⚠️  WARNING: API key not set!{Colors.RESET}")
-        print(f"{Colors.YELLOW}   Get your FREE key from: https://opencagedata.com/{Colors.RESET}")
-        print(f"{Colors.YELLOW}   Then edit this script and change API_KEY variable{Colors.RESET}")
-        print(f"\n{Colors.CYAN}   Press ENTER to continue or CTRL+C to exit{Colors.RESET}")
-        input()
-
 # ===== RUN PROGRAM =====
 
 if __name__ == "__main__":
     try:
-        # Check dependencies
         check_dependencies()
-        
-        # Check API key
-        check_api_key()
-        
-        # Run main program
         main()
-        
     except KeyboardInterrupt:
         print(f"\n\n{Colors.GREEN}👋 Goodbye!{Colors.RESET}")
         sys.exit(0)
